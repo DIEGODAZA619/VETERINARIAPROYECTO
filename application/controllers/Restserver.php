@@ -38,7 +38,7 @@ class Restserver extends REST_Controller {
 		//$this->response($respuesta, REST_Controller::HTTP_UNAUTHORIZED);
 		$this->response($respuesta, REST_Controller::HTTP_OK);
 	}
-	function registro_post()
+	function index_post()
 	{
 		$data = $this->post();
 
