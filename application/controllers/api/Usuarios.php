@@ -50,6 +50,32 @@ class Usuarios extends REST_Controller {
 		  }
 
   	}
+		public function verificarcadena_ckeck($cadena)
+		{
+
+			$patron =  "/^[a-zA-Z\sñáéíóúÁÉÍÓÚ]+$/";
+			if(preg_match($patron, $cadena))
+			{
+				return true;				
+			}
+			else
+			{
+				$this->form_validation->set_message('verificarcadena_ckeck', 'El campo {field} solo debe contener letras');
+				return false;
+			}
+		}
+		public function verificarusuario_ckeck($tipo)
+		{
+			if($tipo == 1 || $tipo == 2)
+			{
+				return true;
+			}
+			else
+			{
+				$this->form_validation->set_message('verificarusuario_ckeck', 'El campo {field} no es correcto');
+				return false;
+			}
+		}
 
   	function registrar_post()
   	{
@@ -75,15 +101,29 @@ class Usuarios extends REST_Controller {
 	  		}
 	  		else
 	  		{
-
-	  			//validacion de datos
-	  			$respuesta = $this->registrarusuario($data);
 	  			
-	  			/*$respuesta = array(
+	  			$this->load->library('form_validation');  //inicializando la libreria
+	  			$this->form_validation->set_data($data);
+	  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
+	  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
+	  			if($this->form_validation->run('usuarios_post'))
+	  			{
+	  				$respuesta = $this->registrarusuario($data);
+	  			}
+	  			else
+	  			{	  				
+	  				$respuesta = array(
 							'error' => false,
-							'mensaje' => 'pruebaaa',
-							'datos' => $data,							
-					);*/
+							'mensaje' => 'datos incorrectos',
+							'errores' => $this->form_validation->get_errores_arreglo(),							
+						);
+	  			}
+
+	  			
+
+	  			//$respuesta = $this->registrarusuario($data);
+	  			
+	  			
 			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
 	  		}
 	  	}
@@ -98,10 +138,43 @@ class Usuarios extends REST_Controller {
   	}
   	function registrarusuario($data)
   	{
+  		$nro_documento = trim($data['nrodocumento']);
+  		$nombres = trim(strtoupper($data['nombres']));
+  		$primer_apellido = trim(strtoupper($data['primer_apellido']));
+  		$segundo_apellido = trim(strtoupper($data['segundo_apellido']));
+  		$tipo_usuario = $data['tipo_usuario'];
+  		$clave = $data['clave'];
+
+  		$nombres_user = str_replace(" ","", $nombres);
+  		$primer_apellido_user = str_replace(" ","",$primer_apellido);
+  		$username = $nombres_user.".".$primer_apellido_user;
+  		$clavemd5 = md5($clave);
+
+  		$datap = array(
+  			'numero_doc' => $nro_documento,
+  			'nombres' => $nombres,
+  			'primer_apellido' => $primer_apellido,
+  			'segundo_apellido' => $segundo_apellido,
+  			'estado' => 'AC',
+  		);
+  		$idpersona = $this->usuarios_model->guardarPersona($datap);
+
+  		$datau = array(
+  			'id_persona' => $idpersona,
+  			'tipo_usuario' => $tipo_usuario,
+  			'username' => $username,
+  			'clave' => $clavemd5,
+  			'estado' => 'AC',
+  		);
+
+  		$idusuario = $this->usuarios_model->guardarUsuario($datau);
+
+
   		$respuesta = array(
 							'error' => false,
-							'mensaje' => 'pruebaaakjdkdjdj',
-							'datos' => $data,							
+							'mensaje' => 'GUARDADO CORRECTAMENTE',
+							'idpersona' => $idpersona,				
+							'idusuario' => $idusuario,				
 			);
 			return $respuesta;
 

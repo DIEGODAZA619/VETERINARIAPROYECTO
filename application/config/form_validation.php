@@ -1,0 +1,31 @@
+<?php
+if(! defined('BASEPATH')) exit('No direct script access allowed');
+
+$config = array(
+	'usuarios_post' => array(
+		array('field' => 'nrodocumento', 
+			  'label' => 'nrodocumento',
+			  'rules' => 'trim|required|numeric|min_length[3]|max_length[9]'),
+		array('field' => 'nombres', 
+			  'label' => 'nombres',
+			  'rules' => 'trim|required|min_length[1]|max_length[100]|callback_verificarcadena_ckeck'),
+		array('field' => 'primer_apellido', 
+			  'label' => 'primer_apellido',
+			  'rules' => 'trim|required|min_length[1]|max_length[100]|callback_verificarcadena_ckeck'),
+		array('field' => 'segundo_apellido', 
+			  'label' => 'segundo_apellido',
+			  'rules' => 'trim|required|min_length[1]|max_length[100]|callback_verificarcadena_ckeck'),
+		array('field' => 'tipo_usuario', 
+			  'label' => 'tipo_usuario',
+			  'rules' => 'trim|required|min_length[1]|max_length[2]|numeric|callback_verificarusuario_ckeck'),
+		array('field' => 'clave', 
+			  'label' => 'clave',
+			  'rules' => 'trim|required|min_length[8]|max_length[20]|alpha_numeric'),
+
+	)
+
+);
+
+
+
+?>

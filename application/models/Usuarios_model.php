@@ -31,6 +31,17 @@ class Usuarios_model extends CI_Model
 		return $query->result();
 	}
 
+	function guardarPersona($data)
+	{
+		$this->db_proyecto->insert('personas',$data);
+		return $this->db_proyecto->insert_id();
+	}
+	function guardarUsuario($data)
+	{
+		$this->db_proyecto->insert('usuarios',$data);
+		return $this->db_proyecto->insert_id();
+	}
+
 }
 
 
