@@ -44,9 +44,17 @@ class Login extends REST_Controller{
 				}
 				elseif ($login[0]->estadouser == 'EX')
 				{
+					$date = new DateTime();
+					//VALORES PARA EL TOKEN
+					$tokenData['idusuario'] = $login[0]->id_usuario;
+					$tokenData['fecha'] = $date->getTimestamp();
+					$jwtToken = $this->objOfJwt->GenerateToken($tokenData); //GENERA EL TOKEN
+
 					$respuesta = array(
 								'error' => true,
 								'mensaje' => 'ACTUALICE LA CONTRASEÑA',
+								'fecha' => $date->getTimestamp(),
+								'token_actualizacion'	=> $jwtToken    //devolvemos el token
 								//'login'	  => $login
 							);
 					$this->response($respuesta, REST_Controller::HTTP_OK);	

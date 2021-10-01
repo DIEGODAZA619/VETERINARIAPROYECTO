@@ -100,8 +100,7 @@ class Usuarios extends REST_Controller {
 					$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
 	  		}
 	  		else
-	  		{
-	  			
+	  		{	  			
 	  			$this->load->library('form_validation');  //inicializando la libreria
 	  			$this->form_validation->set_data($data);
 	  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
@@ -115,7 +114,7 @@ class Usuarios extends REST_Controller {
 	  				$respuesta = array(
 							'error' => false,
 							'mensaje' => 'datos incorrectos',
-							'errores' => $this->form_validation->get_errores_arreglo(),							
+							'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
 						);
 	  			}
 
@@ -164,7 +163,7 @@ class Usuarios extends REST_Controller {
   			'tipo_usuario' => $tipo_usuario,
   			'username' => $username,
   			'clave' => $clavemd5,
-  			'estado' => 'AC',
+  			'estado' => 'EX',
   		);
 
   		$idusuario = $this->usuarios_model->guardarUsuario($datau);
@@ -177,7 +176,195 @@ class Usuarios extends REST_Controller {
 							'idusuario' => $idusuario,				
 			);
 			return $respuesta;
+  	}
+  	public function modificar_post()
+  	{
+  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
+  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
+  		{
+	  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
+	  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
+	  		
+	  		$data = $this->post();
+	  		if (!(array_key_exists('nrodocumento', $data)
+	  					&& array_key_exists('nombres', $data)
+	  					&& array_key_exists('primer_apellido', $data)
+	  					&& array_key_exists('segundo_apellido', $data)	  					
+	  					&& array_key_exists('idpersona', $data))) //idpersona del registro a modificar
+	  		{
+	  			$respuesta = array(
+								'error' => true,
+								'mensaje' => 'Debe introducir los parametros correctos',						
+							);
+					$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
+	  		}
+	  		else
+	  		{	  			
+	  			$this->load->library('form_validation');  //inicializando la libreria
+	  			$this->form_validation->set_data($data);
+	  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
+	  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
+	  			if($this->form_validation->run('usuarios_modificar_post'))
+	  			{
+	  				$respuesta = $this->modificarpersona($data);
+	  				
+	  			}
+	  			else
+	  			{	  				
+	  				$respuesta = array(
+							'error' => false,
+							'mensaje' => 'datos incorrectos',
+							'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
+						);
+	  			}
+	  			//$respuesta = $this->registrarusuario($data);
+			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+	  		}
+	  	}
+		  else
+		  {
+		  	$respuesta = array(
+							'error' => true,
+							'mensaje' => 'ACCESO DENEGADO',
+					);
+			  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
+		  }
+  	}
+  	function modificarpersona($data)
+  	{
+  		$idpersona = trim($data['idpersona']);
+  		if($this->usuarios_model->getpersonaid($idpersona))
+  		{
+  			$nro_documento = trim($data['nrodocumento']);
+	  		$nombres = trim(strtoupper($data['nombres']));
+	  		$primer_apellido = trim(strtoupper($data['primer_apellido']));
+	  		$segundo_apellido = trim(strtoupper($data['segundo_apellido']));
 
+  			$datap = array(
+	  			'numero_doc' => $nro_documento,
+	  			'nombres' => $nombres,
+	  			'primer_apellido' => $primer_apellido,
+	  			'segundo_apellido' => $segundo_apellido,	  			
+	  		);
+  			$idpersonaupdate = $this->usuarios_model->updatePersona($idpersona,$datap);
+  			$respuesta = array(
+							'error' => true,
+							'mensaje' => 'DATOS ACTUALIZADOS CORRECTAMENTE',
+							'idpersona' => $idpersona
+				);
+  		}	
+  		else
+  		{
+  			$respuesta = array(
+							'error' => true,
+							'mensaje' => 'Error, El id de persona no se encuentra registrado',
+				);	
+  		}
+  		
+  		return $respuesta;
+  	}
+
+  	function cambiarclave_post()
+  	{
+  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
+  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
+  		{
+	  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
+	  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
+	  		
+	  		$data = $this->post();
+	  		if (!(array_key_exists('claveactual', $data)
+	  					&& array_key_exists('clavenueva', $data)
+	  					&& array_key_exists('confirmacion', $data))) //idpersona del registro a modificar
+	  		{
+	  			$respuesta = array(
+								'error' => true,
+								'mensaje' => 'Debe introducir los parametros correctos',						
+							);
+					$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
+	  		}
+	  		else
+	  		{	  			
+	  			$this->load->library('form_validation');  //inicializando la libreria
+	  			$this->form_validation->set_data($data);
+	  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
+	  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
+	  			if($this->form_validation->run('cambiarclave_post'))
+	  			{
+	  				$respuesta = $this->actualizarclaveusuario($iduser,$data);
+	  			}
+	  			else
+	  			{	  				
+	  				$respuesta = array(
+							'error' => false,
+							'mensaje' => 'datos incorrectos',
+							'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
+						);
+	  			}
+	  			//$respuesta = $this->registrarusuario($data);
+			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+	  		}
+	  	}
+		  else
+		  {
+		  	$respuesta = array(
+							'error' => true,
+							'mensaje' => 'ACCESO DENEGADO',
+					);
+			  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
+		  }
+  	}
+  	function actualizarclaveusuario($idusuario,$data)
+  	{
+  		$claveactual = md5($data['claveactual']);
+  		$clavenueva = md5($data['clavenueva']);
+  		$confirmacion = md5($data['confirmacion']);
+
+  		if($clavenueva == $confirmacion)
+  		{
+  			if($clavenueva != $claveactual)
+  			{
+  				if($this->usuarios_model->getverificarclaveusario($idusuario,$claveactual))
+	  			{
+	  					$datau = array(
+				  			'clave' => $clavenueva,
+				  			'estado' => 'AC',
+				  		);
+  						$idusuario = $this->usuarios_model->updateUsuario($idusuario,$datau);
+
+  						$respuesta = array(
+								'error' => false,
+								'mensaje' => 'CLAVE ACTUALIZADA CORRECTAMENTE, INICIE SESSION NUEVAMENTE CON LAS NUEVAS CREDENCIALES',
+								'estado' => 'AC',
+								'idusuario' => $idusuario,
+							);
+	  			}
+	  			else
+	  			{
+	  					$respuesta = array(
+							'error' => true,
+							'mensaje' => 'Error, la contraseña actual no es correcta',
+							);
+	  			}
+  			}
+  			else
+  			{
+  				$respuesta = array(
+							'error' => true,
+							'mensaje' => 'Error, la contraseña nueva deber ser diferente a la actual',
+					);
+  			}
+  		}
+  		else
+  		{
+  			$respuesta = array(
+							'error' => true,
+							'mensaje' => 'Error, No coinciden la nueva contraseña con la confirmacion',
+					);
+  		}
+
+  		return $respuesta;
+			
   	}
 }
 

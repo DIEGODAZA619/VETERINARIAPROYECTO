@@ -36,10 +36,36 @@ class Usuarios_model extends CI_Model
 		$this->db_proyecto->insert('personas',$data);
 		return $this->db_proyecto->insert_id();
 	}
+	function updatePersona($idpersona,$data)
+	{
+		$this->db_proyecto->where('id', $idpersona);
+		return $this->db_proyecto->update('personas',$data);
+	}
 	function guardarUsuario($data)
 	{
 		$this->db_proyecto->insert('usuarios',$data);
 		return $this->db_proyecto->insert_id();
+	}
+	function getpersonaid($idpersona)
+	{
+		$query = $this->db_proyecto->query("select *
+			                                  from personas p
+											 where p.id = ".$idpersona);
+		return $query->result();
+	}
+	function getverificarclaveusario($idusuario, $clave)
+	{
+		$query = $this->db_proyecto->query("select *
+			                                  from usuarios u 
+											 where u.id = '".$idusuario."' 
+											   and u.clave = '".$clave."'"
+											);
+		return $query->result();
+	}
+	function updateUsuario($idusuario,$data)
+	{
+		$this->db_proyecto->where('id', $idusuario);
+		return $this->db_proyecto->update('usuarios',$data);
 	}
 
 }
