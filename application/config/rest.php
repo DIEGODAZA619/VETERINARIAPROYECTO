@@ -122,7 +122,7 @@ $config['rest_auth'] = FALSE;
 |
 */
 $config['jwt_secret_key'] = 'My Secret Key!';
-$config['jwt_token_expire'] = 7200;
+$config['jwt_token_expire'] = 600;
 
 /*
 |--------------------------------------------------------------------------

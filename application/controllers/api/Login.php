@@ -16,7 +16,6 @@ class Login extends REST_Controller{
 	public function index_post()
 	{
 		$data = $this->post();
-
 		if(array_key_exists('username', $data) && array_key_exists('clave', $data))			
 		{	
 			$username = $this->post("username");
@@ -30,14 +29,16 @@ class Login extends REST_Controller{
 					$date = new DateTime();
 					//VALORES PARA EL TOKEN
 					$tokenData['idusuario'] = $login[0]->id_usuario;
-					$tokenData['fecha'] = $date->getTimestamp();
+					$tokenData['fecha'] = Date('Y-m-d h:i:s');
+					$tokenData['iat'] = $date->getTimestamp();
+					$tokenData['exp'] = $date->getTimestamp()+$this->config->item('jwt_token_expire');
 
 					$jwtToken = $this->objOfJwt->GenerateToken($tokenData); //GENERA EL TOKEN
 
 					$respuesta = array(
 								'error' => true,
 								'mensaje' => 'TOKEN',
-								'fecha' => $date->getTimestamp(),
+								'fecha' => Date('Y-m-d h:i:s'),
 								'token'	  => $jwtToken    //devolvemos el token
 							);
 					$this->response($respuesta, REST_Controller::HTTP_OK);	

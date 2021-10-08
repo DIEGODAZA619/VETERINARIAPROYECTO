@@ -13,42 +13,54 @@ class Usuarios extends REST_Controller {
 
   	public function getlistausuarios_get()
   	{
-  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
-  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
-  		{
-	  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
-	  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
-	  		$data = $this->usuarios_model->getusarios();
-	  		if($data)
+	  	try
+	  	{
+	  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
+	  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
 	  		{
-	  			$respuesta = array(
-							'error' => false,
-							'mensaje' => 'Correcto, datos usuario',
-							'datos' => $data,
-							'token' => $jwtData,
-							'iduser' => $iduser
-					);
-			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
-	  		}
-	  		else
-	  		{
-	  			$respuesta = array(
-							'error' => true,
-							'mensaje' => 'No se recupero ningun registro de usuarios',
-							'datos' => null,							
-					);
-			  	$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);	
-	  		}	  		
-		  }
-		  else
-		  {
-		  	$respuesta = array(
-							'error' => true,
-							'mensaje' => 'ACCESO DENEGADO',
-					);
-			  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
-		  }
-
+		  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
+		  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
+		  		$data = $this->usuarios_model->getusarios();
+		  		if($data)
+		  		{
+		  			$respuesta = array(
+								'error' => false,
+								'mensaje' => 'Correcto, datos usuario',
+								'datos' => $data,
+								'token' => $jwtData,
+								'iduser' => $iduser
+						);
+				  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+		  		}
+		  		else
+		  		{
+		  			$respuesta = array(
+								'error' => true,
+								'mensaje' => 'No se recupero ningun registro de usuarios',
+								'datos' => null,							
+						);
+				  	$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);	
+		  		}	  		
+			  }
+			  else
+			  {
+			  	$respuesta = array(
+								'error' => true,
+								'mensaje' => 'ACCESO DENEGADO',
+						);
+				  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
+			  }
+			}
+			catch(Exception $e)
+			{
+				http_response_code('401');
+				$respuesta = array(
+												"status" =>false,
+												"message" => $e->getMessage()
+				              	);
+				echo json_encode($respuesta);
+				exit;
+			}
   	}
 		public function verificarcadena_ckeck($cadena)
 		{
@@ -179,56 +191,69 @@ class Usuarios extends REST_Controller {
   	}
   	public function modificar_post()
   	{
-  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
-  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
+  		try
   		{
-	  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
-	  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
-	  		
-	  		$data = $this->post();
-	  		if (!(array_key_exists('nrodocumento', $data)
-	  					&& array_key_exists('nombres', $data)
-	  					&& array_key_exists('primer_apellido', $data)
-	  					&& array_key_exists('segundo_apellido', $data)	  					
-	  					&& array_key_exists('idpersona', $data))) //idpersona del registro a modificar
+	  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
+	  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
 	  		{
-	  			$respuesta = array(
-								'error' => true,
-								'mensaje' => 'Debe introducir los parametros correctos',						
+		  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
+		  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
+		  		
+		  		$data = $this->post();
+		  		if (!(array_key_exists('nrodocumento', $data)
+		  					&& array_key_exists('nombres', $data)
+		  					&& array_key_exists('primer_apellido', $data)
+		  					&& array_key_exists('segundo_apellido', $data)	  					
+		  					&& array_key_exists('idpersona', $data))) //idpersona del registro a modificar
+		  		{
+		  			$respuesta = array(
+									'error' => true,
+									'mensaje' => 'Debe introducir los parametros correctos',						
+								);
+						$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
+		  		}
+		  		else
+		  		{	  			
+		  			$this->load->library('form_validation');  //inicializando la libreria
+		  			$this->form_validation->set_data($data);
+		  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
+		  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
+		  			if($this->form_validation->run('usuarios_modificar_post'))
+		  			{
+		  				$respuesta = $this->modificarpersona($data);
+		  				
+		  			}
+		  			else
+		  			{	  				
+		  				$respuesta = array(
+								'error' => false,
+								'mensaje' => 'datos incorrectos',
+								'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
 							);
-					$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
-	  		}
-	  		else
-	  		{	  			
-	  			$this->load->library('form_validation');  //inicializando la libreria
-	  			$this->form_validation->set_data($data);
-	  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
-	  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
-	  			if($this->form_validation->run('usuarios_modificar_post'))
-	  			{
-	  				$respuesta = $this->modificarpersona($data);
-	  				
-	  			}
-	  			else
-	  			{	  				
-	  				$respuesta = array(
-							'error' => false,
-							'mensaje' => 'datos incorrectos',
-							'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
+		  			}
+		  			//$respuesta = $this->registrarusuario($data);
+				  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+		  		}
+		  	}
+			  else
+			  {
+			  	$respuesta = array(
+								'error' => true,
+								'mensaje' => 'ACCESO DENEGADO',
 						);
-	  			}
-	  			//$respuesta = $this->registrarusuario($data);
-			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
-	  		}
-	  	}
-		  else
-		  {
-		  	$respuesta = array(
-							'error' => true,
-							'mensaje' => 'ACCESO DENEGADO',
-					);
-			  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
-		  }
+				  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
+			  }
+			}
+			catch(Exception $e)
+			{
+				http_response_code('401');
+				$respuesta = array(
+												"status" =>false,
+												"message" => $e->getMessage()
+				              	);
+				echo json_encode($respuesta);
+				exit;
+			}
   	}
   	function modificarpersona($data)
   	{
