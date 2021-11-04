@@ -3,13 +3,16 @@
 require APPPATH . '/libraries/REST_Controller.php';
 require APPPATH . '/libraries/CreatorJwt.php';
 
+header("Access-Control-Allow-Origin: *");
+
 class Usuarios extends REST_Controller {
-  public function __construct(){
+	public function __construct()
+	{
 		parent::__construct();
 		$this->objOfJwt = new CreatorJwt();
 		header('Content-Type: application/json');
 		$this->load->model('usuarios_model');
-  }
+	}
 
   	public function getlistausuarios_get()
   	{
@@ -62,90 +65,103 @@ class Usuarios extends REST_Controller {
 				exit;
 			}
   	}
-		public function verificarcadena_ckeck($cadena)
-		{
+	public function verificarcadena_ckeck($cadena)
+	{
 
-			$patron =  "/^[a-zA-Z\sñáéíóúÁÉÍÓÚ]+$/";
-			if(preg_match($patron, $cadena))
-			{
-				return true;				
-			}
-			else
-			{
-				$this->form_validation->set_message('verificarcadena_ckeck', 'El campo {field} solo debe contener letras');
-				return false;
-			}
-		}
-		public function verificarusuario_ckeck($tipo)
+		$patron =  "/^[a-zA-Z\sñáéíóúÁÉÍÓÚ]+$/";
+		if(preg_match($patron, $cadena))
 		{
-			if($tipo == 1 || $tipo == 2)
-			{
-				return true;
-			}
-			else
-			{
-				$this->form_validation->set_message('verificarusuario_ckeck', 'El campo {field} no es correcto');
-				return false;
-			}
+			return true;				
 		}
+		else
+		{
+			$this->form_validation->set_message('verificarcadena_ckeck', 'El campo {field} solo debe contener letras');
+			return false;
+		}
+	}
+	public function verificarusuario_ckeck($tipo)
+	{
+		if($tipo == 1 || $tipo == 2)
+		{
+			return true;
+		}
+		else
+		{
+			$this->form_validation->set_message('verificarusuario_ckeck', 'El campo {field} no es correcto');
+			return false;
+		}
+	}
 
   	function registrar_post()
   	{
-  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
-  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
+  		try
   		{
-	  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
-	  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
-	  		
-	  		$data = $this->post();
-	  		if (!(array_key_exists('nrodocumento', $data)
-	  					&& array_key_exists('nombres', $data)
-	  					&& array_key_exists('primer_apellido', $data)
-	  					&& array_key_exists('segundo_apellido', $data)
-	  					&& array_key_exists('tipo_usuario', $data)
-	  					&& array_key_exists('clave', $data)))
+	  		$received_Token = $this->input->request_headers('Authorization'); //RECUPERAMOS EL TOKEN 
+	  		if(array_key_exists('Authorization', $received_Token))  //VERIFICAMOS EL PARAMETRO DE Authorization
 	  		{
-	  			$respuesta = array(
-								'error' => true,
-								'mensaje' => 'Debe introducir los parametros correctos',						
+		  		$jwtData = $this->objOfJwt->DecodeToken($received_Token['Authorization']); //DECODIFICAMOS DATOS TOKEN
+		  		$iduser = $jwtData['idusuario']; // OBTENER VALORES DEL TOKEN
+		  		
+		  		$data = $this->post();
+		  		if (!(array_key_exists('nrodocumento', $data)
+		  					&& array_key_exists('nombres', $data)
+		  					&& array_key_exists('primer_apellido', $data)
+		  					&& array_key_exists('segundo_apellido', $data)
+		  					&& array_key_exists('tipo_usuario', $data)
+		  					&& array_key_exists('clave', $data)))
+		  		{
+		  			$respuesta = array(
+									'error' => true,
+									'mensaje' => 'Debe introducir los parametros correctos',						
+								);
+						$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
+		  		}
+		  		else
+		  		{	  			
+		  			$this->load->library('form_validation');  //inicializando la libreria
+		  			$this->form_validation->set_data($data);
+		  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
+		  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
+		  			if($this->form_validation->run('usuarios_post'))
+		  			{
+		  				$respuesta = $this->registrarusuario($data);
+		  			}
+		  			else
+		  			{	  				
+		  				$respuesta = array(
+								'error' => false,
+								'mensaje' => 'datos incorrectos',
+								'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
 							);
-					$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);	
-	  		}
-	  		else
-	  		{	  			
-	  			$this->load->library('form_validation');  //inicializando la libreria
-	  			$this->form_validation->set_data($data);
-	  			//$this->form_validation->set_rules('nombres','nombres','required');   // aplicando reglas de validacion
-	  		//	if($this->form_validation->run() == FALSE) // obteniendo respuesta de validacion
-	  			if($this->form_validation->run('usuarios_post'))
-	  			{
-	  				$respuesta = $this->registrarusuario($data);
-	  			}
-	  			else
-	  			{	  				
-	  				$respuesta = array(
-							'error' => false,
-							'mensaje' => 'datos incorrectos',
-							'errores' => $this->form_validation->get_errores_arreglo(),		//SE DEVUELVE LOS ERRORES					
+		  			}
+
+		  			
+
+		  			//$respuesta = $this->registrarusuario($data);
+		  			
+		  			
+				  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+		  		}
+		  	}
+			  else
+			  {
+			  	$respuesta = array(
+								'error' => true,
+								'mensaje' => 'ACCESO DENEGADO',
 						);
-	  			}
-
-	  			
-
-	  			//$respuesta = $this->registrarusuario($data);
-	  			
-	  			
-			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
-	  		}
-	  	}
-		  else
-		  {
-		  	$respuesta = array(
-							'error' => true,
-							'mensaje' => 'ACCESO DENEGADO',
-					);
-			  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
-		  }
+				  $this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
+			  }
+			}
+			catch(Exception $e)
+			{
+				http_response_code('401');
+				$respuesta = array(
+												"status" =>false,
+												"message" => $e->getMessage()
+				              	);
+				echo json_encode($respuesta);
+				exit;
+			}
   	}
   	function registrarusuario($data)
   	{
@@ -388,8 +404,42 @@ class Usuarios extends REST_Controller {
 					);
   		}
 
-  		return $respuesta;
-			
+  		return $respuesta;			
+  	}
+  	public function getlistausuarios2_get()
+  	{
+	  	try
+	  	{
+  			$data = $this->usuarios_model->getusarios();
+	  		if($data)
+	  		{
+	  			$respuesta = array(
+							'error' => false,
+							'mensaje' => 'Correcto, datos usuario',
+							'datos' => $data,							
+					);
+			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+	  		}
+	  		else
+	  		{
+	  			$respuesta = array(
+							'error' => true,
+							'mensaje' => 'No se recupero ningun registro de usuarios',
+							'datos' => null,							
+					);
+			  	$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);	
+	  		}	
+		}
+		catch(Exception $e)
+		{
+			http_response_code('401');
+			$respuesta = array(
+							"status" =>false,
+							"message" => $e->getMessage()
+			              	);
+			echo json_encode($respuesta);
+			exit;
+		}
   	}
 }
 
