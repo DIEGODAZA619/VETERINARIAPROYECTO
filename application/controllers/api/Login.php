@@ -3,6 +3,11 @@
 require APPPATH . '/libraries/REST_Controller.php';
 require APPPATH . '/libraries/CreatorJwt.php';
 
+//header("Access-Control-Allow-Origin: *");
+
+//header("Access-Control-Allow-Methods: GET,POST");
+
+
 class Login extends REST_Controller{
 
 	public function __construct()
@@ -12,7 +17,7 @@ class Login extends REST_Controller{
 		header('Content-Type: application/json');
 		$this->load->model('usuarios_model');
 	}
-
+	
 	public function index_post()
 	{
 		$data = $this->post();
@@ -36,7 +41,7 @@ class Login extends REST_Controller{
 					$jwtToken = $this->objOfJwt->GenerateToken($tokenData); //GENERA EL TOKEN
 
 					$respuesta = array(
-								'error' => true,
+								'error' => false,
 								'mensaje' => 'TOKEN',
 								'fecha' => Date('Y-m-d h:i:s'),
 								'token'	  => $jwtToken    //devolvemos el token
@@ -67,7 +72,7 @@ class Login extends REST_Controller{
 								'mensaje' => 'USUARIO DESAHABILITADO',
 								//'login'	  => $login
 							);
-					$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);	
+					$this->response($respuesta, REST_Controller::HTTP_OK);	
 				}
 			}
 			else
@@ -76,7 +81,7 @@ class Login extends REST_Controller{
 								'error' => true,
 								'mensaje' => 'Datos no Existentes',							
 							);
-				$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);
+				$this->response($respuesta, REST_Controller::HTTP_OK);
 			}
 		}
 		else
