@@ -3,7 +3,7 @@
 require APPPATH . '/libraries/REST_Controller.php';
 require APPPATH . '/libraries/CreatorJwt.php';
 
-header("Access-Control-Allow-Origin: *");
+//header('content-type: application/json; charset=utf-8');
 
 class Usuarios extends REST_Controller {
 	public function __construct()
@@ -58,6 +58,9 @@ class Usuarios extends REST_Controller {
 			{
 				http_response_code('401');
 				$respuesta = array(
+												'error' => true,
+												'mensaje' => 'ACCESO DENEGADOSSS',
+												'datos' => $received_Token,
 												"status" =>false,
 												"message" => $e->getMessage()
 				              	);
@@ -156,6 +159,8 @@ class Usuarios extends REST_Controller {
 			{
 				http_response_code('401');
 				$respuesta = array(
+												'error' => true,
+												'mensaje' => 'ACCESO DENEGADO',
 												"status" =>false,
 												"message" => $e->getMessage()
 				              	);
@@ -264,6 +269,8 @@ class Usuarios extends REST_Controller {
 			{
 				http_response_code('401');
 				$respuesta = array(
+												'error' => true,
+												'mensaje' => 'ACCESO DENEGADO',
 												"status" =>false,
 												"message" => $e->getMessage()
 				              	);
@@ -434,6 +441,8 @@ class Usuarios extends REST_Controller {
 		{
 			http_response_code('401');
 			$respuesta = array(
+							'error' => true,
+							'mensaje' => 'ACCESO DENEGADO',
 							"status" =>false,
 							"message" => $e->getMessage()
 			              	);
