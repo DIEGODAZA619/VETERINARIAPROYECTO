@@ -31,6 +31,15 @@ class Usuarios_model extends CI_Model
 		return $query->result();
 	}
 
+	function getusarios_pruebas()
+	{
+		$query = $this->db_proyecto->query("select u.id, p.nombres as message, u.estado as state, u.tipo_usuario as fechaRegistro, u.username as fechaRecepcion
+			                                  from personas p, usuarios u 
+											 where p.id = u.id_persona
+											 order by u.id desc");
+		return $query->result();
+	}
+
 	function guardarPersona($data)
 	{
 		$this->db_proyecto->insert('personas',$data);
