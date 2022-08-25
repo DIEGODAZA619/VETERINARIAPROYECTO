@@ -31,11 +31,20 @@ class Usuarios_model extends CI_Model
 		return $query->result();
 	}
 
+<<<<<<< HEAD
 	function getusariosPruebas()
 	{
 		$query = $this->db_proyecto->query("select p.id as id, p.nombres as message, p.primer_apellido as state, p.segundo_apellido as fechaRegistro, p.estado  as fechaRecepcion
 			                                  from personas p, usuarios u 
 											 where p.id = u.id_persona");
+=======
+	function getusarios_pruebas()
+	{
+		$query = $this->db_proyecto->query("select u.id, p.nombres as message, u.estado as state, u.tipo_usuario as fechaRegistro, u.username as fechaRecepcion
+			                                  from personas p, usuarios u 
+											 where p.id = u.id_persona
+											 order by u.id desc");
+>>>>>>> 837f3b5ce05d0c09851d4a413c40a4567afc413e
 		return $query->result();
 	}
 

@@ -96,27 +96,32 @@ class Login extends REST_Controller{
 		
 	}
 
-
-
-	public function prueba_post()
+	function prueba_post($value='')
 	{
 		$data = $this->post();
-		if(array_key_exists('message', $data) )			
+		if(array_key_exists('message', $data))			
 		{	
-			
-			$message = $this->post("message");
+			$message = $this->post("message");			
+			$datap = array(
+  			'numero_doc' => "prueba",
+  			'nombres' => $message,
+  			'primer_apellido' => "prueba 1",
+  			'segundo_apellido' => "prueba 2",
+  			'estado' => 'AC',
+  			);
+  			$idpersona = $this->usuarios_model->guardarPersona($datap);	
 
-			$date = new DateTime();			
-			
-			/*$respuesta = array(
-						'error' => false,
-						'mensaje' => 'ingreso correcto',
-						'fecha' => $date->getTimestamp(),
-						'datos_ingresados'	=> "Valores ingresados".$username." --- ". $clave,    //devolvemos el token
-						//'login'	  => $login
-					);*/
-			$message = "REGISTRADO CORRECTAMENTE";
-			$this->response($message, REST_Controller::HTTP_OK);				
+  			$datau = array(
+  			'id_persona' => $idpersona,
+  			'tipo_usuario' => "ADMINISTRADOR",
+  			'username' => $message,
+  			'clave' => "prueba_3",
+  			'estado' => 'EX',
+  				);
+
+  				$idusuario = $this->usuarios_model->guardarUsuario($datau);
+			$respuesta = "DATOS GUARDATOS CORRECTAMENTE";
+			$this->response($respuesta, REST_Controller::HTTP_OK);
 		}
 		else
 		{
@@ -126,35 +131,36 @@ class Login extends REST_Controller{
 							);
 			$this->response($respuesta, REST_Controller::HTTP_BAD_REQUEST);
 		}
-		
+
 		
 	}
 
 	public function getlistausuarios_get()
   	{
-	  		  		
-	  		$data = $this->usuarios_model->getusariosPruebas(); //---
-	  		if($data)
-	  		{
-	  			$respuesta = array(
-							'error' => false,
-							'mensaje' => 'Correcto, datos usuario',
-							'content' => $data,					
-							
-					);
-			  	$this->response($respuesta, REST_Controller::HTTP_OK);	
-	  		}
-	  		else
-	  		{
-	  			$respuesta = array(
-							'error' => true,
-							'mensaje' => 'No se recupero ningun registro de propietario',
-							'datos' => null,							
-					);
-			  	$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);	
-	  		}	  		
-			  
+	  	
+  		
+  		$data = $this->usuarios_model->getusarios_pruebas();
+  		if($data)
+  		{
+  			$respuesta = array(
+						'error' => false,
+						'mensaje' => 'Correcto, datos usuario',
+						'content' => $data,						
+				);
+		  	$this->response($respuesta, REST_Controller::HTTP_OK);	
+  		}
+  		else
+  		{
+  			$respuesta = array(
+						'error' => true,
+						'mensaje' => 'No se recupero ningun registro de usuarios',
+						'datos' => null,							
+				);
+		  	$this->response($respuesta, REST_Controller::HTTP_NOT_FOUND);	
+  		}	  		
+			 
   	}
+
 
 }
 
