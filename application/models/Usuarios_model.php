@@ -40,6 +40,17 @@ class Usuarios_model extends CI_Model
 											 order by u.id desc");
 		return $query->result();
 	}
+	function guardarMensaje($data)
+	{
+		$this->db_proyecto->insert('message',$data);
+		return $this->db_proyecto->insert_id();
+	}
+	function getMensajes()
+	{
+		$query = $this->db_proyecto->query("select *
+			                                  from message");
+		return $query->result();
+	}
 
 	function guardarPersona($data)
 	{

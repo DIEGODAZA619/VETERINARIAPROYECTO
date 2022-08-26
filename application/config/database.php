@@ -7,10 +7,10 @@ $query_builder = TRUE;
 $db['proyecto'] = array(
 	'dsn'	=> '',
 	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
+	'username' => 'postgres',
+	'password' => '1982',
 	'database' => 'veterinaria',
-	'dbdriver' => 'mysqli',
+	'dbdriver' => 'postgre',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
 	'db_debug' => (ENVIRONMENT !== 'production'),

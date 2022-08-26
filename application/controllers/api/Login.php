@@ -96,30 +96,23 @@ class Login extends REST_Controller{
 		
 	}
 
-	function prueba_post($value='')
+	function mensajeGuardar_post($value='')
 	{
 		$data = $this->post();
+		$fecha = Date('Y-m-d h:i:s');
 		if(array_key_exists('message', $data))			
 		{	
-			$message = $this->post("message");			
-			$datap = array(
-  			'numero_doc' => "prueba",
-  			'nombres' => $message,
-  			'primer_apellido' => "prueba 1",
-  			'segundo_apellido' => "prueba 2",
-  			'estado' => 'AC',
+			$message = $this->post("message");	
+
+			$datap = array(	  			
+	  			'message' => $message,
+	  			'fecha_recepcion' => $fecha,
+	  			'fecha_registro' => $fecha,
+	  			'state' => "ACTIVO"  			
   			);
-  			$idpersona = $this->usuarios_model->guardarPersona($datap);	
 
-  			$datau = array(
-  			'id_persona' => $idpersona,
-  			'tipo_usuario' => "ADMINISTRADOR",
-  			'username' => $message,
-  			'clave' => "prueba_3",
-  			'estado' => 'EX',
-  				);
-
-  				$idusuario = $this->usuarios_model->guardarUsuario($datau);
+  			$idpersona = $this->usuarios_model->guardarMensaje($datap);	
+  			
 			$respuesta = "DATOS GUARDATOS CORRECTAMENTE";
 			$this->response($respuesta, REST_Controller::HTTP_OK);
 		}
@@ -135,11 +128,11 @@ class Login extends REST_Controller{
 		
 	}
 
-	public function getlistausuarios_get()
+	public function getMensajes_get()
   	{
 	  	
   		
-  		$data = $this->usuarios_model->getusarios_pruebas();
+  		$data = $this->usuarios_model->getMensajes();
   		if($data)
   		{
   			$respuesta = array(
